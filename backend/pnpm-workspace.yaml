@@ -1,0 +1,6 @@
+allowBuilds:
+  '@prisma/engines': false
+  better-sqlite3: false
+  cpu-features: false
+  prisma: false
+  ssh2: false

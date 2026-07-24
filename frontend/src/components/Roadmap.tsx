@@ -13,7 +13,7 @@ interface RoadmapItem {
 const roadmapData: RoadmapItem[] = [
     {
         id: 1,
-        title: "Lançamento do Servidor",
+        title: "Kanto",
         date: "17/01/2026",
         description: "Abertura oficial do servidor com a Região de Kanto.",
         features: ["Região de Kanto", "Sistema de Ginásios", "Pokémon da 1ª Geração", "Economia Dinâmica", "Sistema de Breeding"],
@@ -21,7 +21,7 @@ const roadmapData: RoadmapItem[] = [
     },
     {
         id: 2,
-        title: "Lançamento de Kanto+",
+        title: "Kanto+",
         date: "07/03/2026",
         description: "Uma experiência completa com novas mecânicas exclusivas do servidor.",
         features: ["Todos os Pokémon", "Missões Exclusivas", "Profissões", "Novas Mecânicas"],
@@ -29,10 +29,10 @@ const roadmapData: RoadmapItem[] = [
     },
     {
         id: 3,
-        title: "Lançamento de Johto",
-        date: "Em Breve",
-        description: "A jornada continua pela Região de Johto.",
-        features: ["Região de Johto", "Pokémon da 2ª Geração", "Eventos de Lendários", "Novas Pokébolas"],
+        title: "Survival",
+        date: "25/07/2026",
+        description: "Aventura Pokémon pelo mundo de Minecraft.",
+        features: ["Todos os Pokémon", "Sistema de Breeding", "Clans", "Raids todo dia", "Itens exclusivos", "Novos minérios"],
         color: "bg-secondary"
     }
 ];
@@ -42,7 +42,7 @@ export function Roadmap() {
 
     return (
         <div className="w-full max-w-5xl py-12 flex flex-col items-center gap-10">
-            <h2 className="font-title text-4xl text-foreground">Roadmap</h2>
+            <h2 className="font-title text-4xl text-foreground">Servidores</h2>
 
             <div className="flex flex-wrap justify-center gap-8 md:gap-20">
                 {roadmapData.map((item) => (
