@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BiAdjust } from "react-icons/bi";
 import { CiMenuBurger } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
+import logo from "@/assets/logo.png";
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,7 @@ export function Header() {
             <header className="fixed top-0 left-0 w-full z-50 h-20 md:h-16 bg-secondary/75 backdrop-blur-sm flex items-center justify-between px-6 text-bright_text shadow-lg transition-all">
                 <div className="flex items-center gap-3 md:gap-4 z-60">
                     <img
-                        src="src/assets/logo.png"
+                        src={logo}
                         alt="Logo"
                         onClick={() => window.location.href = "/"}
                         className="w-10 h-10 md:w-12 md:h-12 cursor-pointer"

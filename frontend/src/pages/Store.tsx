@@ -292,12 +292,13 @@ export function Store() {
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
                                         {storeProducts.map((item: any) => {
+                                            
                                             const getImageUrl = (path?: string) => {
                                                 if (!path) return undefined;
-
                                                 if (path.startsWith("http")) return path;
-
-                                                return `${API_URL}${path}`;
+                                                return path.startsWith("/")
+                                                    ? `${API_URL}${path}`
+                                                    : `${API_URL}/${path}`;
                                             };
 
                                             return (

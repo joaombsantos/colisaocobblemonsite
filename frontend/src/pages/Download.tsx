@@ -46,7 +46,7 @@ export function Download() {
                                 <Button 
                                     label="Download Direto" 
                                     icon={FaDownload} 
-                                    destination="https://www.mediafire.com/file/8c5q7rxwavqb1a2/modpackcolisaocobblemon1.0.4.zip/file"
+                                    destination="https://www.mediafire.com/file/zze1ktu8zx56rxp/modpack.zip/file"
                                     color="primary"
                                     className="w-full"
                                     fontSize="xl"

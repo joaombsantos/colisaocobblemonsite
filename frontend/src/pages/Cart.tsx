@@ -164,7 +164,7 @@ export function Cart() {
             <Header />
 
             <div className="w-full max-w-6xl mx-auto py-32 px-6">
-                <h1 className="text-3xl font-title text-primary mb-8 flex items-center gap-3">
+                <h1 className="text-4xl font-bold text-primary mb-8 flex items-center gap-3">
                     <FaShoppingCart /> Seu Carrinho
                 </h1>
 
@@ -186,21 +186,20 @@ export function Cart() {
                     <div className="flex flex-col lg:flex-row items-start gap-8">
 
                         <div className="w-full lg:w-2/3 flex flex-col gap-4">
-                            {[...cartItems]
-                                .sort((a, b) => a.product.server.localeCompare(b.product.server))
-                                .sort((a, b) => a.product.productName.localeCompare(b.product.productName))
-                                .map((item: any) => (
+                            {cartItems.map((item: any) => {
+                                return (
                                     <ProductCard
-                                        key={item.id}
+                                        key={item.product.id}
                                         productName={item.product.productName}
-                                        price={Number(item.product.price)}
+                                        price={item.product.price}
                                         server={item.product.server}
-                                        photoUrl={getImageUrl(item.product.photoUrl)}
+                                        photoUrl={getImageUrl(item.product.photoUrl) || ""}
                                         quantity={item.quantity}
                                         onUpdateQuantity={(newQuantity) => handleUpdateQuantity(item.product.id, newQuantity)}
                                         onRemove={() => handleRemove(item.product.id)}
                                     />
-                                ))}
+                                );
+                            })}
                         </div>
 
                         <Box className="w-full lg:w-1/3 items-start! text-left! flex flex-col gap-6 sticky top-32">
@@ -236,35 +235,35 @@ export function Cart() {
                                     {paymentMethod === "pix" && (
                                         <div className="flex flex-col gap-3 mt-2 animate-in fade-in slide-in-from-top-2">
                                             <p className="text-sm opacity-70">Preencha os campos abaixo:</p>
-                                            
+
                                             <div className="flex gap-2">
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Nome" 
+                                                <input
+                                                    type="text"
+                                                    placeholder="Nome"
                                                     value={firstName}
                                                     onChange={(e) => setFirstName(e.target.value)}
                                                     className="w-1/2 bg-background border border-secondary/30 rounded-lg p-3 text-foreground outline-none focus:border-primary transition-colors"
                                                 />
-                                                <input 
-                                                    type="text" 
-                                                    placeholder="Sobrenome" 
+                                                <input
+                                                    type="text"
+                                                    placeholder="Sobrenome"
                                                     value={lastName}
                                                     onChange={(e) => setLastName(e.target.value)}
                                                     className="w-1/2 bg-background border border-secondary/30 rounded-lg p-3 text-foreground outline-none focus:border-primary transition-colors"
                                                 />
                                             </div>
-                                            
-                                            <input 
-                                                type="email" 
-                                                placeholder="E-mail" 
+
+                                            <input
+                                                type="email"
+                                                placeholder="E-mail"
                                                 value={email}
                                                 onChange={(e) => setEmail(e.target.value)}
                                                 className="w-full bg-background border border-secondary/30 rounded-lg p-3 text-foreground outline-none focus:border-primary transition-colors"
                                             />
 
-                                            <input 
-                                                type="number" 
-                                                placeholder="CPF" 
+                                            <input
+                                                type="number"
+                                                placeholder="CPF"
                                                 value={cpf}
                                                 onChange={(e) => setCpf(e.target.value)}
                                                 maxLength={14}

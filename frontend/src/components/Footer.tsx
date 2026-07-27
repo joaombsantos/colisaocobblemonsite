@@ -1,10 +1,11 @@
 import { FaYoutube, FaDiscord, FaTiktok } from "react-icons/fa";
+import logo from "@/assets/logo.png";
 
 export function Footer() {
     return (
         <footer className="footer text-bright_text w-full overflow-hidden gap-3">
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8 justify-center w-full px-4">
-                <img src="src/assets/logo.png" alt="Logo" className="w-12 h-12 md:w-16 md:h-16" />
+                <img src={logo} alt="Logo" className="w-12 h-12 md:w-16 md:h-16" />
                 <h1 className="font-title text-3xl sm:text-4xl md:text-6xl text-center wrap-break-word max-w-full">
                     Colisão Cobblemon
                 </h1>

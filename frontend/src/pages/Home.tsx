@@ -12,6 +12,11 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Roadmap } from "../components/Roadmap";
+import celebiGif from "@/assets/celebi.gif";
+import print1 from "@/assets/print1.png";
+import print2 from "@/assets/print2.png";
+import print3 from "@/assets/print3.png";
+import print4 from "@/assets/print4.png";
 
 export function Home() {
     return (
@@ -22,7 +27,7 @@ export function Home() {
             <div className="flex flex-col items-center justify-center gap-12 sm:gap-16 md:gap-20 text-center px-4 md:px-8 py-8 max-w-7xl mx-auto">
                 <div className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
                     <img 
-                        src="src/assets/celebi.gif" 
+                        src={celebiGif}
                         alt="Banner de Kanto+" 
                         className="max-w-62.5 sm:max-w-xs md:max-w-sm h-auto object-contain" 
                     />
@@ -76,16 +81,16 @@ export function Home() {
                     >
                         <CarouselContent>
                             <CarouselItem>
-                                <img src="src/assets/print1.png" alt="Imagem com Inicias em Pallet" className="w-full h-auto rounded-lg object-cover" />
+                                <img src={print1} alt="Imagem com Inicias em Pallet" className="w-full h-auto rounded-lg object-cover" />
                             </CarouselItem>
                             <CarouselItem>
-                                <img src="src/assets/print2.png" alt="Imagem com Inicias na Liga Pokémon" className="w-full h-auto rounded-lg object-cover" />
+                                <img src={print2} alt="Imagem com Inicias na Liga Pokémon" className="w-full h-auto rounded-lg object-cover" />
                             </CarouselItem>
                             <CarouselItem>
-                                <img src="src/assets/print3.png" alt="Batalha entre 2 jogadores" className="w-full h-auto rounded-lg object-cover" />
+                                <img src={print3} alt="Batalha entre 2 jogadores" className="w-full h-auto rounded-lg object-cover" />
                             </CarouselItem>
                             <CarouselItem>
-                                <img src="src/assets/print4.png" alt="Imagem com Inicias de Kanto" className="w-full h-auto rounded-lg object-cover" />
+                                <img src={print4} alt="Imagem com Inicias de Kanto" className="w-full h-auto rounded-lg object-cover" />
                             </CarouselItem>
                         </CarouselContent>
                         <CarouselPrevious className="-left-6 sm:-left-12" />
