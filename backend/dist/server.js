@@ -21,7 +21,7 @@ app.set('trust proxy', 1);
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.use((0, cors_1.default)());
-app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, '../uploads')));
+app.use('/uploads', express_1.default.static(path_1.default.join(__dirname, 'uploads')));
 app.use(routes_1.default);
 app.use((0, cors_1.default)({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
