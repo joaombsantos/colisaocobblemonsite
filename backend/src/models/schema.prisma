@@ -5,11 +5,12 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
-  provider = "postgres"
+  provider = "mysql"
 }
 
 // Enums
@@ -35,12 +36,23 @@ model Product {
   price            Decimal
   server           ServerType
   category         ProductCategory
-  description      String?
+  description      String?         @db.Text
   descriptionImage String
   command          String?
   requireOnline    Boolean         @default(false)
 
   cartItems CartItem[]
+}
+
+model Promotion {
+  id        String          @id @default(uuid())
+  category  String          
+  discount  Decimal         
+  days      Int             
+  hours     Int             
+  expiresAt DateTime        
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
 }
 
 model Cart {

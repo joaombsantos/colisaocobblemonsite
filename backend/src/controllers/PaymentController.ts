@@ -23,10 +23,27 @@ export class PaymentController {
             include: { items: { include: { product: true } } }
         });
 
-        if (!cart) return 0;
+        if (!cart || cart.items.length === 0) return 0;
+
+        const now = new Date();
+        const activePromotions = await prisma.promotion.findMany({
+            where: { isActive: true, expiresAt: { gt: now } }
+        });
 
         return cart.items.reduce((total, item) => {
-            return total + (Number(item.product.price) * item.quantity);
+            const product = item.product;
+            let currentPrice = Number(product.price);
+
+            const promotion = activePromotions.find(
+                p => p.category === product.category.toLowerCase() || p.category === 'all'
+            );
+
+            if (promotion) {
+                const discountPercentage = Number(promotion.discount);
+                currentPrice = currentPrice - (currentPrice * (discountPercentage / 100));
+            }
+
+            return total + (Number(currentPrice.toFixed(2)) * item.quantity);
         }, 0);
     }
 

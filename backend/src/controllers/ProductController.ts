@@ -38,7 +38,9 @@ export class ProductController {
         try {
             const products = await prisma.product.findMany();
 
-            return res.status(200).json(products);
+            const productsWithPromotion = await ProductController.applyPromotion(products);
+
+            return res.status(200).json(productsWithPromotion);
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
@@ -90,7 +92,9 @@ export class ProductController {
                 return res.status(404).json({ message: 'Products not found' });
             }
 
-            return res.status(200).json(products);
+            const productsWithPromotion = await ProductController.applyPromotion(products);
+
+            return res.status(200).json(productsWithPromotion);
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
@@ -130,5 +134,51 @@ export class ProductController {
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
+    }
+
+    // ==========================================
+    // UTILS - Apply active promotions to products
+    // ==========================================
+    private static async applyPromotion(products: any[]) {
+        const now = new Date();
+
+        await prisma.promotion.updateMany({
+            where: { expiresAt: { lt: now }, isActive: true },
+            data: { isActive: false }
+        });
+
+        const activePromotions = await prisma.promotion.findMany({
+            where: { isActive: true, expiresAt: { gt: now } }
+        });
+
+        if (activePromotions.length === 0) {
+            return products.map(p => ({ ...p, hasPromotion: false }));
+        }
+
+        return products.map(product => {
+            const promotion = activePromotions.find(
+                p => p.category === product.category.toLowerCase() || p.category === 'all'
+            );
+
+            if (promotion) {
+                const originalPrice = Number(product.price);
+                const discountPercentage = Number(promotion.discount);
+                const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+
+                return {
+                    ...product,
+                    originalPrice,
+                    discountPercentage,
+                    price: Number(discountedPrice.toFixed(2)),
+                    hasPromotion: true,
+                    expiresAt: promotion.expiresAt
+                };
+            }
+
+            return {
+                ...product,
+                hasPromotion: false
+            };
+        });
     }
 }

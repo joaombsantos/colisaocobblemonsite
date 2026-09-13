@@ -1,8 +1,60 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class CartController {
+
+    // ==========================================
+    // UTILS - Aplicar promoções aos produtos do carrinho
+    // ==========================================
+    private static async applyPromotionsToCartItems(items: any[]) {
+        if (!items || items.length === 0) return items;
+
+        const now = new Date();
+
+        await prisma.promotion.updateMany({
+            where: { expiresAt: { lt: now }, isActive: true },
+            data: { isActive: false }
+        });
+
+        const activePromotions = await prisma.promotion.findMany({
+            where: { isActive: true, expiresAt: { gt: now } }
+        });
+
+        return items.map(item => {
+            const product = item.product;
+            if (!product) return item;
+
+            const promotion = activePromotions.find(
+                p => p.category === product.category.toLowerCase() || p.category === 'all'
+            );
+
+            if (promotion) {
+                const originalPrice = Number(product.price);
+                const discountPercentage = Number(promotion.discount);
+                const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
+
+                return {
+                    ...item,
+                    product: {
+                        ...product,
+                        originalPrice,
+                        discountPercentage,
+                        price: Number(discountedPrice.toFixed(2)),
+                        hasPromotion: true,
+                        expiresAt: promotion.expiresAt
+                    }
+                };
+            }
+
+            return {
+                ...item,
+                product: {
+                    ...product,
+                    hasPromotion: false
+                }
+            };
+        });
+    }
 
     // ==========================================
     // GET - Get player's cart
@@ -28,20 +80,21 @@ export class CartController {
 
             if (!cart) {
                 cart = await prisma.cart.create({
-                    data: {
-                        nick,
-                    },
+                    data: { nick },
                     include: {
                         items: {
-                            include: {
-                                product: true,
-                            },
+                            include: { product: true },
                         },
                     },
                 });
             }
 
-            return res.status(200).json(cart);
+            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(cart.items);
+
+            return res.status(200).json({
+                ...cart,
+                items: itemsWithDiscount
+            });
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
@@ -75,9 +128,7 @@ export class CartController {
 
             if (!cart) {
                 cart = await prisma.cart.create({
-                    data: {
-                        nick: playerNick,
-                    },
+                    data: { nick: playerNick },
                 });
             }
 
@@ -107,14 +158,17 @@ export class CartController {
                 where: { id: cart.id },
                 include: {
                     items: {
-                        include: {
-                            product: true,
-                        },
+                        include: { product: true },
                     },
                 },
             });
 
-            return res.status(200).json(updatedCart);
+            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+
+            return res.status(200).json({
+                ...updatedCart,
+                items: itemsWithDiscount
+            });
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
@@ -169,14 +223,17 @@ export class CartController {
                 where: { id: cart.id },
                 include: {
                     items: {
-                        include: {
-                            product: true,
-                        },
+                        include: { product: true },
                     },
                 },
             });
 
-            return res.status(200).json(updatedCart);
+            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+
+            return res.status(200).json({
+                ...updatedCart,
+                items: itemsWithDiscount
+            });
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
@@ -222,21 +279,24 @@ export class CartController {
                 where: { id: cart.id },
                 include: {
                     items: {
-                        include: {
-                            product: true,
-                        },
+                        include: { product: true },
                     },
                 },
             });
 
-            return res.status(200).json(updatedCart);
+            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+
+            return res.status(200).json({
+                ...updatedCart,
+                items: itemsWithDiscount
+            });
         } catch (error: any) {
             return res.status(500).json({ message: error.message });
         }
     }
 
     // ==========================================
-    // DELETE - Cleal a player's cart
+    // DELETE - Clear a player's cart
     // ==========================================
     static async clearCart(req: Request, res: Response) {
         try {
