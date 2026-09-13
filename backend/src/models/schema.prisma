@@ -44,6 +44,17 @@ model Product {
   cartItems CartItem[]
 }
 
+model Promotion {
+  id        String          @id @default(uuid())
+  category  String          
+  discount  Decimal         
+  days      Int             
+  hours     Int             
+  expiresAt DateTime        
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+}
+
 model Cart {
   id   String @id @default(uuid())
   nick String @unique

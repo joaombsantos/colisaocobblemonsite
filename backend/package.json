@@ -4,9 +4,9 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx ts-node-dev --transpile-only --no-notify server.ts",
-    "build": "tsc"
+    "start": "npx prisma generate && npx ts-node-dev --transpile-only --no-notify server.ts",
+    "build": "npx prisma generate && tsc",
+    "prod": "npx prisma migrate deploy && node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -31,11 +31,11 @@
     "schema": "src/models/schema.prisma"
   },
   "dependencies": {
-    "@prisma/adapter-mariadb": "^7.9.0",
+    "@prisma/adapter-mariadb": "^7.10.0",
     "@prisma/adapter-pg": "^7.6.0",
     "better-sqlite3": "^12.8.0",
     "express-rate-limit": "^8.5.2",
-    "mariadb": "^3.5.3",
+    "mariadb": "^3.5.4",
     "mercadopago": "^3.2.0",
     "nodemailer": "^9.0.3",
     "rcon": "^1.1.0",

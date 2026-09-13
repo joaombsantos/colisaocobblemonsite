@@ -10,6 +10,7 @@ import { CartController } from "../controllers/CartController";
 import { PaymentController } from "../controllers/PaymentController";
 import { verifyApiKey } from "../middlewares/verifyApiKey";
 import { DeliveryController } from "../controllers/DeliveryController";
+import { PromotionController } from "../controllers/PromotionController";
 
 const router: Router = Router();
 
@@ -39,5 +40,10 @@ router.post("/api/checkout/card", validateSchema(createCardPaymentSchema), Payme
 router.get("/api/commands", verifyApiKey, DeliveryController.getPendingCommands);
 router.get("/api/commands/bulk", DeliveryController.getBulkPendingCommands);
 router.post("/api/commands/confirm", verifyApiKey, DeliveryController.completeDelivery);
+
+// Promotions
+router.post('/api/promotion', verifyApiKey, PromotionController.createPromotion);
+router.delete('/api/promotion/:identifier', verifyApiKey, PromotionController.deletePromotion);
+router.get('/api/promotions/active', PromotionController.getActivePromotions);
 
 export default router;
