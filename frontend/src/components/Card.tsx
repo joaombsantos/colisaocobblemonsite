@@ -8,13 +8,25 @@ interface CardProps {
     id: string;
     productName: string;
     price: number;
+    originalPrice?: number;
+    hasPromotion?: boolean;
     photoUrl: string;
     description?: string;
     descriptionImage?: string;
     onAdd: (productId: string) => void;
 }
 
-export function Card({ id, productName: title, price, photoUrl: image, description, descriptionImage, onAdd }: CardProps) {
+export function Card({
+    id,
+    productName: title,
+    price,
+    originalPrice,
+    hasPromotion,
+    photoUrl: image,
+    description,
+    descriptionImage,
+    onAdd
+}: CardProps) {
     const [showInfo, setShowInfo] = useState(false);
     const [isAdding, setIsAdding] = useState(false);
 
@@ -28,7 +40,7 @@ export function Card({ id, productName: title, price, photoUrl: image, descripti
 
     return (
         <>
-            <div className="group bg-secondary/10 dark:bg-white/5 rounded-2xl shadow-md hover:shadow-2xl overflow-hidden border border-secondary/20 transition-all duration-300 flex flex-col h-full">
+            <div className="group bg-secondary/10 dark:bg-white/5 rounded-2xl shadow-md hover:shadow-2xl overflow-hidden border border-secondary/20 transition-all duration-300 flex flex-col h-full relative">
                 <div className="relative overflow-hidden h-48 md:h-56 justify-center items-center flex bg-black/5 p-4">
                     <img
                         src={image}
@@ -42,9 +54,22 @@ export function Card({ id, productName: title, price, photoUrl: image, descripti
                         <h3 className="text-lg md:text-xl font-bold font-body text-foreground line-clamp-2 min-h-14">
                             {title}
                         </h3>
-                        <span className="font-body font-bold text-lg text-primary">
-                            R$ {Number(price).toFixed(2)}
-                        </span>
+
+                        {/* Bloco de Preços Dinâmico */}
+                        {hasPromotion && originalPrice ? (
+                            <div className="flex flex-col">
+                                <span className="text-xs text-foreground/50 line-through font-body">
+                                    De: R$ {Number(originalPrice).toFixed(2)}
+                                </span>
+                                <span className="font-body font-bold text-lg text-primary">
+                                    Por: R$ {Number(price).toFixed(2)}
+                                </span>
+                            </div>
+                        ) : (
+                            <span className="font-body font-bold text-lg text-primary">
+                                R$ {Number(price).toFixed(2)}
+                            </span>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-4 gap-2 mt-auto">
@@ -101,15 +126,27 @@ export function Card({ id, productName: title, price, photoUrl: image, descripti
                                         {description || "Nenhuma descrição detalhada disponível para este item."}
                                     </p>
 
-                                    <div className="w-full pt-4 flex flex-col gap-4 items-center border-t border-bright_text/10">
-                                        <span className="font-bold text-3xl text-button">
-                                            R$ {Number(price).toFixed(2)}
-                                        </span>
+                                    <div className="w-full pt-4 flex flex-col gap-2 items-center border-t border-bright_text/10">
+                                        {hasPromotion && originalPrice ? (
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-sm text-bright_text/60 line-through font-body">
+                                                    De: R$ {Number(originalPrice).toFixed(2)}
+                                                </span>
+                                                <span className="font-bold text-3xl text-button">
+                                                    Por: R$ {Number(price).toFixed(2)}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <span className="font-bold text-3xl text-button">
+                                                R$ {Number(price).toFixed(2)}
+                                            </span>
+                                        )}
+
                                         <Button
                                             label={isAdding ? "Adicionado!" : "Adicionar ao Carrinho"}
                                             icon={FaShoppingCart}
                                             color="primary"
-                                            className="w-full"
+                                            className="w-full mt-2"
                                             onClick={handleAddClick}
                                         />
                                     </div>

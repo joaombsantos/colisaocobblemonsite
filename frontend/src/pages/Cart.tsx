@@ -155,9 +155,16 @@ export function Cart() {
         return `${API_URL}${path}`;
     };
 
+    const originalTotalCart = cartItems.reduce((acc, item) => {
+        const basePrice = item.product.originalPrice || item.product.price;
+        return acc + (Number(basePrice) * item.quantity);
+    }, 0);
+
     const totalCart = cartItems.reduce((acc, item) => {
         return acc + (Number(item.product.price) * item.quantity);
     }, 0);
+
+    const hasCartPromotion = cartItems.some(item => item.product.hasPromotion && item.product.originalPrice)
 
     return (
         <div className="min-h-screen bg-background text-foreground transition-colors duration-300 pb-20">
@@ -192,6 +199,8 @@ export function Cart() {
                                         key={item.product.id}
                                         productName={item.product.productName}
                                         price={item.product.price}
+                                        originalPrice={item.product.originalPrice}
+                                        hasPromotion={item.product.hasPromotion}
                                         server={item.product.server}
                                         photoUrl={getImageUrl(item.product.photoUrl) || ""}
                                         quantity={item.quantity}
@@ -205,9 +214,23 @@ export function Cart() {
                         <Box className="w-full lg:w-1/3 items-start! text-left! flex flex-col gap-6 sticky top-32">
                             <h2 className="text-3xl font-bold text-foreground">Finalizar Pedido</h2>
 
-                            <div className="flex justify-between w-full items-center border-b border-secondary/20 pb-4">
+                            <div className="flex justify-between items-center w-full border-b border-secondary/20 pb-4">
                                 <span className="text-lg font-bold">Total:</span>
-                                <span className="text-3xl font-bold text-button">R$ {totalCart.toFixed(2)}</span>
+
+                                {hasCartPromotion && originalTotalCart > totalCart ? (
+                                    <div className="flex flex-col items-end">
+                                        <span className="text-xs text-foreground/50 line-through font-body">
+                                            R$ {originalTotalCart.toFixed(2)}
+                                        </span>
+                                        <span className="text-2xl md:text-3xl font-bold text-button">
+                                            R$ {totalCart.toFixed(2)}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    <span className="text-2xl md:text-3xl font-bold text-button">
+                                        R$ {totalCart.toFixed(2)}
+                                    </span>
+                                )}
                             </div>
 
                             {/* Seleção de Pagamento ou Exibição do PIX */}

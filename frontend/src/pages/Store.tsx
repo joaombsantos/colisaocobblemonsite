@@ -9,11 +9,42 @@ import { Card } from "../components/Card";
 import storeBg from "../assets/store_background.png";
 import { FaShoppingCart } from "react-icons/fa";
 
+function CountdownTimer({ expiresAt }: { expiresAt: string }) {
+    const [timeLeft, setTimeLeft] = useState("");
+
+    useEffect(() => {
+        const updateTimer = () => {
+            const diff = new Date(expiresAt).getTime() - new Date().getTime();
+            if (diff <= 0) {
+                setTimeLeft("Expirado");
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / 1000 / 60) % 60);
+
+            if (days > 0) {
+                setTimeLeft(`${days}d ${hours}h`);
+            } else {
+                setTimeLeft(`${hours}h ${minutes}m`);
+            }
+        };
+
+        updateTimer();
+        const interval = setInterval(updateTimer, 60000);
+        return () => clearInterval(interval);
+    }, [expiresAt]);
+
+    return <span>{timeLeft}</span>;
+}
+
 export function Store() {
     const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3333";
 
     const [nick, setNick] = useState("");
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [promotions, setPromotions] = useState<any[]>([]);
 
     useEffect(() => {
         const nickSalvo = localStorage.getItem("@colisao:nick");
@@ -22,6 +53,24 @@ export function Store() {
             setIsSubmitted(true);
         }
     }, []);
+
+    useEffect(() => {
+        const fetchPromotions = async () => {
+            try {
+                const response = await fetch(`${API_URL}/api/promotions/active`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setPromotions(data);
+                }
+            } catch (err) {
+                console.error("Erro ao buscar promoções:", err);
+            }
+        };
+
+        fetchPromotions();
+        const interval = setInterval(fetchPromotions, 30000);
+        return () => clearInterval(interval);
+    }, [API_URL]);
 
     const [errorMsg, setErrorMsg] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -41,9 +90,7 @@ export function Store() {
 
             const contentType = response.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
-                const textError = await response.text();
-                console.error("Servidor retornou algo que não é JSON:", textError);
-                setErrorMsg("Erro interno no servidor (Rota não encontrada).");
+                setErrorMsg("Erro interno no servidor.");
                 return;
             }
 
@@ -57,7 +104,6 @@ export function Store() {
                 setErrorMsg(data.error || "Nick não encontrado.");
             }
         } catch (err) {
-            console.error("Erro de conexão:", err);
             setErrorMsg("Erro ao conectar com o servidor.");
         } finally {
             setIsLoading(false);
@@ -76,29 +122,11 @@ export function Store() {
                 })
             });
 
-            const contentType = response.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                const textError = await response.text();
-                console.error("O servidor não retornou JSON. Resposta bruta:", textError);
-                alert("Erro no servidor: Verifique o console para mais detalhes.");
-                return;
-            }
-
-            const data = await response.json();
-
-            if (response.ok) {
-                console.log("Carrinho atualizado:", data);
-            } else {
-                console.error("Erro do Backend:", data);
-
-                const mensagemErro = data.details
-                    ? data.details.map((d: any) => d.message).join(", ")
-                    : data.error;
-
-                alert(`Erro: ${mensagemErro || "Falha ao adicionar"}`);
+            if (!response.ok) {
+                const data = await response.json();
+                alert(`Erro: ${data.error || "Falha ao adicionar"}`);
             }
         } catch (error) {
-            console.error("Erro de conexão (CORS ou Servidor Offline):", error);
             alert("Erro de conexão ao adicionar produto.");
         }
     };
@@ -140,11 +168,9 @@ export function Store() {
                 if (response.ok) {
                     setStoreProducts(data);
                 } else {
-                    console.error("Erro ao buscar produtos:", data);
                     setStoreProducts([]);
                 }
             } catch (error) {
-                console.error("Erro na conexão com API de produtos:", error);
                 setStoreProducts([]);
             } finally {
                 setIsLoadingProducts(false);
@@ -248,20 +274,37 @@ export function Store() {
                                 />
 
                                 <nav className="flex flex-col gap-2 w-full mt-4">
-                                    {categories.map((cat) => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setActiveCategories(cat)}
-                                            className={`
-                                            w-full text-left px-4 py-3 rounded-xl font-body font-bold transition-all
-                                            ${activeCategories === cat
-                                                    ? "bg-button text-bright_text shadow-md"
-                                                    : "hover:bg-secondary/20 text-foreground/70"}
-                                                `}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
+                                    {categories.map((cat) => {
+                                        const catKey = categoryMap[cat];
+
+                                        const activePromo = promotions.find(p => {
+                                            if (!p.isActive) return false;
+                                            const promoCat = p.category?.toLowerCase();
+                                            return promoCat === 'all' || promoCat === catKey?.toLowerCase();
+                                        });
+
+                                        return (
+                                            <button
+                                                key={cat}
+                                                onClick={() => setActiveCategories(cat)}
+                                                className={`
+                                                w-full px-4 py-3 rounded-xl font-body font-bold transition-all flex items-center justify-between gap-2
+                                                ${activeCategories === cat
+                                                ? "bg-button text-bright_text shadow-md"
+                                                : "hover:bg-secondary/20 text-foreground/75"}
+                                            `}
+                                            >
+                                                <span className="text-left">{cat}</span>
+                                                {activePromo && (
+                                                    <span className="shrink-0 flex items-center gap-1 text-[10px] md:text-xs font-semibold bg-red-500/15 text-red-600 px-2 py-0.5 rounded-md">
+                                                        <span>-{activePromo.discount}%</span>
+                                                        <span className="opacity-75">|</span>
+                                                        <CountdownTimer expiresAt={activePromo.expiresAt} />
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
                                 </nav>
                             </Box>
                         </aside>
@@ -275,7 +318,7 @@ export function Store() {
                                         <h3 className="text-xl font-bold text-foreground">Como comprar no Colisão Cobblemon?</h3>
                                         <p>1. Certifique-se de estar logado com seu nick correto.</p>
                                         <p>2. Escolha o servidor desejado no menu lateral.</p>
-                                        <p>3. Selecione seus itens e clique em "Ver Meu Carrinnho" para ser redirecionado ao checkout.</p>
+                                        <p>3. Selecione seus itens e clique em "Ver Meu Carrinho" para ser redirecionado ao checkout.</p>
                                         <p>4. Após o pagamento você receberá seus itens em até 1 minuto online no servidor.</p>
                                         <div className="p-4 bg-button/10 border-l-4 border-button rounded-r-lg mt-6">
                                             <p className="text-sm italic">A entrega dos produtos é feita após a confirmação do pagamento.</p>
@@ -292,7 +335,6 @@ export function Store() {
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 ">
                                         {storeProducts.map((item: any) => {
-                                            
                                             const getImageUrl = (path?: string) => {
                                                 if (!path) return undefined;
                                                 if (path.startsWith("http")) return path;
@@ -307,6 +349,8 @@ export function Store() {
                                                     id={item.id}
                                                     productName={item.productName || item.title}
                                                     price={item.price}
+                                                    originalPrice={item.originalPrice}
+                                                    hasPromotion={item.hasPromotion}
                                                     photoUrl={getImageUrl(item.photoUrl) || ""}
                                                     description={item.description}
                                                     descriptionImage={getImageUrl(item.descriptionImage)}
