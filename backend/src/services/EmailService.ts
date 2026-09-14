@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { PromotionHelper } from "../utils/promotionHelper";
 
 export class EmailService {
     private static transporter = nodemailer.createTransport({
@@ -9,10 +10,19 @@ export class EmailService {
         },
     });
 
-    static async sendPurchaseNotification(nick: string, total: number, items: any[]) {
+    static async sendPurchaseNotification(nick: string, items: any[]) {
         try {
-            const itemsList = items
-                .map(item => `${item.quantity}x ${item.product.productName} (${item.product.server})`)
+            const discountedItems = await PromotionHelper.applyToCartItems(items);
+            const total = discountedItems.reduce((acc, item) => acc + (Number(item.product.price) * item.quantity), 0);
+
+            const itemsList = discountedItems
+                .map(item => {
+                    const priceStr = item.product.hasPromotion 
+                        ? `R$${item.product.price.toFixed(2)} (Antigo: R$${item.product.originalPrice.toFixed(2)})` 
+                        : `R$${item.product.price.toFixed(2)}`;
+                    
+                    return `${item.quantity}x ${item.product.productName} - ${priceStr} (${item.product.server})`;
+                })
                 .join("\n");
 
             const mailOptions = {
