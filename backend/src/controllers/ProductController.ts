@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductCategory, ServerType } from "@prisma/client";
 import { prisma } from "../config/prisma";
+import { PromotionHelper } from '../utils/promotionHelper';
 
 export class ProductController {
 
@@ -140,45 +141,6 @@ export class ProductController {
     // UTILS - Apply active promotions to products
     // ==========================================
     private static async applyPromotion(products: any[]) {
-        const now = new Date();
-
-        await prisma.promotion.updateMany({
-            where: { expiresAt: { lt: now }, isActive: true },
-            data: { isActive: false }
-        });
-
-        const activePromotions = await prisma.promotion.findMany({
-            where: { isActive: true, expiresAt: { gt: now } }
-        });
-
-        if (activePromotions.length === 0) {
-            return products.map(p => ({ ...p, hasPromotion: false }));
-        }
-
-        return products.map(product => {
-            const promotion = activePromotions.find(
-                p => p.category === product.category.toLowerCase() || p.category === 'all'
-            );
-
-            if (promotion) {
-                const originalPrice = Number(product.price);
-                const discountPercentage = Number(promotion.discount);
-                const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
-
-                return {
-                    ...product,
-                    originalPrice,
-                    discountPercentage,
-                    price: Number(discountedPrice.toFixed(2)),
-                    hasPromotion: true,
-                    expiresAt: promotion.expiresAt
-                };
-            }
-
-            return {
-                ...product,
-                hasPromotion: false
-            };
-        });
+        return await PromotionHelper.applyToProducts(products);
     }
 }

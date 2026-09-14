@@ -3,6 +3,7 @@ import { CommandService } from "../services/CommandService";
 import { MercadoPagoConfig, Payment, Preference } from 'mercadopago';
 import { prisma } from "../config/prisma";
 import { EmailService } from "../services/EmailService";
+import { PromotionHelper } from "../utils/promotionHelper";
 
 export class PaymentController {
 
@@ -25,26 +26,7 @@ export class PaymentController {
 
         if (!cart || cart.items.length === 0) return 0;
 
-        const now = new Date();
-        const activePromotions = await prisma.promotion.findMany({
-            where: { isActive: true, expiresAt: { gt: now } }
-        });
-
-        return cart.items.reduce((total, item) => {
-            const product = item.product;
-            let currentPrice = Number(product.price);
-
-            const promotion = activePromotions.find(
-                p => p.category === product.category.toLowerCase() || p.category === 'all'
-            );
-
-            if (promotion) {
-                const discountPercentage = Number(promotion.discount);
-                currentPrice = currentPrice - (currentPrice * (discountPercentage / 100));
-            }
-
-            return total + (Number(currentPrice.toFixed(2)) * item.quantity);
-        }, 0);
+        return await PromotionHelper.calculateCartTotal(cart.items);
     }
 
     static async createPixPayment(req: Request, res: Response) {
@@ -131,7 +113,7 @@ export class PaymentController {
 
     static async handleWebhook(req: Request, res: Response) {
         console.log("\n[WEBHOOK] 🔔 Bateu uma requisição do Mercado Pago!");
-        
+
         const topic = req.query?.topic || req.body?.type;
         if (topic === "merchant_order") {
             console.log("[WEBHOOK] Ignorando aviso de merchant_order.");
@@ -152,7 +134,7 @@ export class PaymentController {
             console.log(`[WEBHOOK] ⚠️ Pagamento ${idStr} já está em processamento simultâneo. Ignorando duplicata.`);
             return res.status(200).send("Pagamento já em processamento.");
         }
-        
+
         PaymentController.processingPayments.add(idStr);
 
         try {
@@ -171,13 +153,9 @@ export class PaymentController {
                     });
 
                     if (cart && cart.items.length > 0) {
-                        const total = cart.items.reduce((acc, item) => {
-                            return acc + (Number(item.product.price) * item.quantity);
-                        }, 0);
-
-                        await EmailService.sendPurchaseNotification(playerNick, total, cart.items);
+                        await EmailService.sendPurchaseNotification(playerNick, cart.items);
                         console.log(`[PAGAMENTO APROVADO] Entregando itens para: ${playerNick}`);
-                        
+
                         await CommandService.executeCartCommands(playerNick);
                     } else {
                         console.log(`[AVISO] Carrinho já está vazio para: ${playerNick}. Entrega não necessária ou já realizada.`);

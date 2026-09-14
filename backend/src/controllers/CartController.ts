@@ -1,60 +1,8 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/prisma";
+import { PromotionHelper } from "../utils/promotionHelper";
 
 export class CartController {
-
-    // ==========================================
-    // UTILS - Aplicar promoções aos produtos do carrinho
-    // ==========================================
-    private static async applyPromotionsToCartItems(items: any[]) {
-        if (!items || items.length === 0) return items;
-
-        const now = new Date();
-
-        await prisma.promotion.updateMany({
-            where: { expiresAt: { lt: now }, isActive: true },
-            data: { isActive: false }
-        });
-
-        const activePromotions = await prisma.promotion.findMany({
-            where: { isActive: true, expiresAt: { gt: now } }
-        });
-
-        return items.map(item => {
-            const product = item.product;
-            if (!product) return item;
-
-            const promotion = activePromotions.find(
-                p => p.category === product.category.toLowerCase() || p.category === 'all'
-            );
-
-            if (promotion) {
-                const originalPrice = Number(product.price);
-                const discountPercentage = Number(promotion.discount);
-                const discountedPrice = originalPrice - (originalPrice * (discountPercentage / 100));
-
-                return {
-                    ...item,
-                    product: {
-                        ...product,
-                        originalPrice,
-                        discountPercentage,
-                        price: Number(discountedPrice.toFixed(2)),
-                        hasPromotion: true,
-                        expiresAt: promotion.expiresAt
-                    }
-                };
-            }
-
-            return {
-                ...item,
-                product: {
-                    ...product,
-                    hasPromotion: false
-                }
-            };
-        });
-    }
 
     // ==========================================
     // GET - Get player's cart
@@ -89,7 +37,7 @@ export class CartController {
                 });
             }
 
-            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(cart.items);
+            const itemsWithDiscount = await PromotionHelper.applyToCartItems(cart.items);
 
             return res.status(200).json({
                 ...cart,
@@ -163,7 +111,7 @@ export class CartController {
                 },
             });
 
-            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+            const itemsWithDiscount = await PromotionHelper.applyToCartItems(updatedCart?.items || []);
 
             return res.status(200).json({
                 ...updatedCart,
@@ -228,7 +176,7 @@ export class CartController {
                 },
             });
 
-            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+            const itemsWithDiscount = await PromotionHelper.applyToCartItems(updatedCart?.items || []);
 
             return res.status(200).json({
                 ...updatedCart,
@@ -284,7 +232,7 @@ export class CartController {
                 },
             });
 
-            const itemsWithDiscount = await CartController.applyPromotionsToCartItems(updatedCart?.items || []);
+            const itemsWithDiscount = await PromotionHelper.applyToCartItems(updatedCart?.items || []);
 
             return res.status(200).json({
                 ...updatedCart,

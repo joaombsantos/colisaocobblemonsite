@@ -4,49 +4,36 @@ import { prisma } from "../config/prisma";
 export class PromotionController {
 
     // ==========================================
-    // CREATE - Criar promoção (Rota: /api/promotion)
+    // CREATE - Create Promotion
     // ==========================================
     static async createPromotion(req: Request, res: Response) {
         try {
-            const { category, discount, time_days, time_hours } = req.body;
-
-            const parsedDays = parseInt(time_days, 10);
-            const parsedHours = parseInt(time_hours, 10);
-            const parsedDiscount = parseFloat(discount);
-
-            if (!category || isNaN(parsedDays) || isNaN(parsedHours) || isNaN(parsedDiscount)) {
-                return res.status(400).json({ message: 'Category, time_days, time_hours e discount são obrigatórios e devem ser válidos.' });
-            }
-
-            const normalizedCategory = category.toLowerCase();
-            const validCategories = ['vips', 'caixas', 'passes', 'all'];
-
-            if (!validCategories.includes(normalizedCategory)) {
-                return res.status(400).json({ message: 'Categoria inválida. Use: vips, caixas, passes ou all.' });
-            }
+            const { category, discount, time_days, time_hours, time_minutes } = req.body;
 
             const expiresAt = new Date();
-            expiresAt.setDate(expiresAt.getDate() + parsedDays);
-            expiresAt.setHours(expiresAt.getHours() + parsedHours);
+            expiresAt.setDate(expiresAt.getDate() + time_days);
+            expiresAt.setHours(expiresAt.getHours() + time_hours);
+            expiresAt.setMinutes(expiresAt.getMinutes() + time_minutes);
 
-            if (normalizedCategory === 'all') {
+            if (category === 'all') {
                 await prisma.promotion.updateMany({
                     where: { isActive: true },
                     data: { isActive: false }
                 });
             } else {
                 await prisma.promotion.updateMany({
-                    where: { category: normalizedCategory, isActive: true },
+                    where: { category: category, isActive: true },
                     data: { isActive: false }
                 });
             }
 
             const newPromotion = await prisma.promotion.create({
                 data: {
-                    category: normalizedCategory,
-                    discount: parsedDiscount,
-                    days: parsedDays,
-                    hours: parsedHours,
+                    category: category,
+                    discount: discount,
+                    days: time_days,
+                    hours: time_hours,
+                    minutes: time_minutes,
                     expiresAt,
                     isActive: true
                 }
@@ -62,7 +49,7 @@ export class PromotionController {
     }
 
     // ==========================================
-    // READ - Listar promoções ativas
+    // READ - Get all promotions
     // ==========================================
     static async getActivePromotions(req: Request, res: Response) {
         try {
@@ -88,12 +75,12 @@ export class PromotionController {
     }
 
     // ==========================================
-    // DELETE / CANCEL - Encerrar promoção(ões)
+    // DELETE / CANCEL - Delete a promotion
     // ==========================================
     static async deletePromotion(req: Request, res: Response) {
         try {
             const { identifier } = req.params as { identifier: string };
-            
+
             const normalizedIdOrCategory = identifier.toLowerCase();
             const validCategories = ['vips', 'caixas', 'passes', 'all'];
 
