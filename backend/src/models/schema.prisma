@@ -45,14 +45,15 @@ model Product {
 }
 
 model Promotion {
-  id        String          @id @default(uuid())
-  category  String          
-  discount  Decimal         
-  days      Int             
-  hours     Int             
-  expiresAt DateTime        
-  isActive  Boolean         @default(true)
-  createdAt DateTime        @default(now())
+  id        String   @id @default(uuid())
+  category  String
+  discount  Decimal
+  days      Int
+  hours     Int
+  minutes   Int      @default(0)
+  expiresAt DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 }
 
 model Cart {

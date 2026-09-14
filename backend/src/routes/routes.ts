@@ -11,6 +11,7 @@ import { PaymentController } from "../controllers/PaymentController";
 import { verifyApiKey } from "../middlewares/verifyApiKey";
 import { DeliveryController } from "../controllers/DeliveryController";
 import { PromotionController } from "../controllers/PromotionController";
+import { promotionSchema } from "../schemas/promotionSchema";
 
 const router: Router = Router();
 
@@ -42,7 +43,7 @@ router.get("/api/commands/bulk", DeliveryController.getBulkPendingCommands);
 router.post("/api/commands/confirm", verifyApiKey, DeliveryController.completeDelivery);
 
 // Promotions
-router.post('/api/promotion', verifyApiKey, PromotionController.createPromotion);
+router.post('/api/promotion', validateSchema(promotionSchema), verifyApiKey, PromotionController.createPromotion);
 router.delete('/api/promotion/:identifier', verifyApiKey, PromotionController.deletePromotion);
 router.get('/api/promotions/active', PromotionController.getActivePromotions);
 
