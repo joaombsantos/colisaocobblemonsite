@@ -153,11 +153,7 @@ export class PaymentController {
                     });
 
                     if (cart && cart.items.length > 0) {
-                        const total = cart.items.reduce((acc, item) => {
-                            return acc + (Number(item.product.price) * item.quantity);
-                        }, 0);
-
-                        await EmailService.sendPurchaseNotification(playerNick, total, cart.items);
+                        await EmailService.sendPurchaseNotification(playerNick, cart.items);
                         console.log(`[PAGAMENTO APROVADO] Entregando itens para: ${playerNick}`);
 
                         await CommandService.executeCartCommands(playerNick);
