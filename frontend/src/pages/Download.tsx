@@ -46,7 +46,7 @@ export function Download() {
                                 <Button 
                                     label="Download Direto" 
                                     icon={FaDownload} 
-                                    destination="https://www.mediafire.com/file/zze1ktu8zx56rxp/modpack.zip/file"
+                                    destination="https://www.mediafire.com/file/rnn5lxdfjlda8cu/Modpack_Atualizado.zip/file"
                                     color="primary"
                                     className="w-full"
                                     fontSize="xl"
