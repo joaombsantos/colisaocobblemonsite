@@ -6,7 +6,7 @@ import { Button } from "../components/Button";
 import { Dropdown } from "../components/Dropdown";
 import { Card } from "../components/Card";
 
-import storeBg from "../assets/store_background.png";
+import storeBg from "../assets/store_background.webp";
 import { FaShoppingCart } from "react-icons/fa";
 
 function CountdownTimer({ expiresAt }: { expiresAt: string }) {

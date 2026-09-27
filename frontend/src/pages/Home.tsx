@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Roadmap } from "../components/Roadmap";
-import celebiGif from "@/assets/celebi.gif";
-import print1 from "@/assets/print1.png";
-import print2 from "@/assets/print2.png";
-import print3 from "@/assets/print3.png";
-import print4 from "@/assets/print4.png";
+import celebiGif from "@/assets/celebi.webp";
+import print1 from "@/assets/print1.webp";
+import print2 from "@/assets/print2.webp";
+import print3 from "@/assets/print3.webp";
+import print4 from "@/assets/print4.webp";
 
 export function Home() {
     return (
