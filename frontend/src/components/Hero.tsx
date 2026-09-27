@@ -1,4 +1,4 @@
-import heroGif from "../assets/hero.gif";
+import heroGif from "../assets/hero.webp";
 import { Button } from "./Button";
 import { FaDownload } from "react-icons/fa";
 

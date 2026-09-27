@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { BiAdjust } from "react-icons/bi";
 import { CiMenuBurger } from "react-icons/ci";
 import { IoClose } from "react-icons/io5";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 export function Header() {
     const [isOpen, setIsOpen] = useState(false);

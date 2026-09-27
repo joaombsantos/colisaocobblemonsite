@@ -1,5 +1,5 @@
 import { FaYoutube, FaDiscord, FaTiktok } from "react-icons/fa";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 export function Footer() {
     return (
